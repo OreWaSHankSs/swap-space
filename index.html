@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SwapSpace — Swap, Don't Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#7c3aed; --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#071028 0%, #071028 40%, #071a2b 100%);color:#e6eef8}
+    a{color:inherit}
+
+    /* Landing */
+    .hero{min-height:72vh;display:flex;align-items:center;justify-content:center;padding:40px}
+    .panel{width:1100px;max-width:96%;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:16px;padding:36px;box-shadow:0 10px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    .brand{display:flex;align-items:center;gap:18px}
+    .logo{height:84px;width:84px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:28px;color:white;box-shadow:0 6px 20px rgba(124,58,237,0.25)}
+    h1{font-size:48px;margin:0;line-height:1;color:white}
+    p.lead{color:var(--muted);margin-top:10px}
+
+    .cta{margin-top:26px;display:flex;gap:14px}
+    .btn{background:var(--accent);border:none;padding:12px 18px;border-radius:10px;color:white;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(124,58,237,0.18)}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+
+    /* Layout */
+    header.sitebar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:transparent}
+    .nav-actions{display:flex;gap:12px;align-items:center}
+    .search{min-width:300px;background:var(--glass);padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);color:var(--muted)}
+
+    main.container{padding:24px 36px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+
+    .card{background:linear-gradient(180deg,var(--card), rgba(12,18,30,0.6));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:10px}
+    .card img{width:100%;height:170px;object-fit:cover;border-radius:8px;background:linear-gradient(90deg,#111827,#0b1220)}
+    .meta{display:flex;justify-content:space-between;align-items:center}
+    .title{font-weight:700}
+    .muted{color:var(--muted);font-size:13px}
+
+    .fab{position:fixed;right:28px;bottom:120px;background:linear-gradient(180deg,var(--accent),#06b6d4);width:64px;height:64px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:white;font-size:28px;box-shadow:0 10px 30px rgba(7,11,25,0.6);cursor:pointer}
+
+    /* Modals & forms */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;padding:20px}
+    .modal{background:linear-gradient(180deg,#061428,#071428);padding:20px;border-radius:12px;width:760px;max-width:96%;border:1px solid rgba(255,255,255,0.03)}
+    label{display:block;margin-top:10px;font-weight:600}
+    input[type=text],input[type=email],input[type=password],textarea,select{width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit}
+    .row{display:flex;gap:12px}
+    .row > *{flex:1}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* Chatbot */
+    .chatbot{position:fixed;right:24px;bottom:18px;width:360px;max-width:calc(100% - 48px);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg,#021428,#031428);box-shadow:0 12px 36px rgba(2,6,23,0.7)}
+    .chatbot.minimized .messages, .chatbot.minimized .chat-input { display: none; }
+    .chathead{display:flex;align-items:center;gap:12px;padding:12px}
+    .chathead .name{font-weight:700}
+    .messages{height:300px;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+    .msg{max-width:78%;padding:10px;border-radius:10px}
+    .msg.me{align-self:flex-end;background:linear-gradient(180deg,#0b1220,#08121a);border:1px solid rgba(255,255,255,0.02)}
+    .msg.bot{align-self:flex-start;background:linear-gradient(180deg,#072733,#04363a);border:1px solid rgba(255,255,255,0.02)}
+    .chat-input{display:flex;border-top:1px solid rgba(255,255,255,0.02)}
+    .chat-input input{flex:1;padding:12px;border:0;background:transparent;color:inherit}
+    .chat-input button{padding:12px;border:0;background:var(--accent);color:white}
+
+    footer.sitefoot{padding:18px 36px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.02)}
+
+    /* responsive tweaks */
+    @media (max-width:900px){.brand h1{font-size:34px}.hero{padding:18px}.logo{height:64px;width:64px;font-size:22px}.messages{height:220px}}
+  </style>
+</head>
+<body>
+  <!-- Landing / Header -->
+  <div class="hero" id="landing">
+    <div class="panel">
+      <div class="brand">
+        <div class="logo">SS</div>
+        <div>
+          <h1>SwapSpace</h1>
+          <p class="lead">Swap your stuff. Meet your neighbors. Trade with trust. A beautiful place to exchange goods — no cash necessary.</p>
+          <div class="cta">
+            <button class="btn" id="btn-getstarted">Get started — Sign up</button>
+            <button class="btn ghost" id="btn-signin-hero">Sign in</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:22px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap">
+        <div style="background:var(--glass);padding:10px;border-radius:10px">Secure profiles</div>
+        <div style="background:var(--glass);padding:10px;border-radius:10px">Verified contacts</div>
+        <div style="background:var(--glass);padding:10px;border-radius:10px">Instant messaging</div>
+        <div style="background:var(--glass);padding:10px;border-radius:10px">Beautiful UI</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site header & actions (shown after login) -->
+  <header class="sitebar" id="sitebar" style="display:none">
+    <div style="display:flex;gap:18px;align-items:center">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo">SS</div>
+        <div>
+          <div style="font-weight:800">SwapSpace</div>
+          <div class="small">Swap. Don't Shop.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <input id="searchInput" class="search" placeholder="Search products, categories, location..." />
+      <div id="userBubble" style="display:flex;align-items:center;gap:10px">
+        <div class="small" id="loggedName"></div>
+        <button class="btn ghost" id="btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main container (product grid) -->
+  <main class="container" id="mainApp" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <h2 style="margin:0">All Listings</h2>
+        <div class="small">Explore items people in the community want to swap</div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <select id="filterLocation" style="padding:8px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.02);color:var(--muted)">
+          <option value="">All locations</option>
+        </select>
+        <button class="btn" id="btnAddProduct">Add my product</button>
+      </div>
+    </div>
+
+    <div class="grid" id="productGrid"></div>
+  </main>
+
+  <!-- Floating add button -->
+  <div class="fab" id="fabAdd" title="Add product" style="display:none">+</div>
+
+  <!-- Footer -->
+  <footer class="sitefoot" id="siteFooter" style="display:none">
+    <div>Contact: <span id="ownerContact">owner@swapspace.app</span> • Phone: +91-90000-00000</div>
+    <div>© <span id="year"></span> SwapSpace — All rights reserved</div>
+  </footer>
+
+  <!-- Login / Signup modals -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="modalContent">
+      <!-- dynamic content injected -->
+    </div>
+  </div>
+
+  <!-- Chatbot -->
+  <div class="chatbot" id="chatbot">
+    <div class="chathead">
+      <div style="width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:800">CB</div>
+      <div style="flex:1">
+        <div class="name">SwapBot — Ask me anything</div>
+        <div class="small">I answer FAQs and help you with swap queries.</div>
+      </div>
+      <button id="toggleChat" style="background:none;border:none;color:white;font-size:18px;cursor:pointer;padding:0;margin:0">-</button>
+    </div>
+    <div class="messages" id="botMessages"></div>
+    <div class="chat-input">
+      <input id="botInput" placeholder="Ask about swap rules, safety, or app features..." />
+      <button id="botSend">Send</button>
+    </div>
+  </div>
+
+  <!-- Message modal (for buyer-seller chat) -->
+  <div class="modal-backdrop" id="msgBackdrop">
+    <div class="modal" style="max-width:720px;" id="msgModal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="msgTitle" style="font-weight:800">Chat with seller</div>
+          <div class="small" id="msgSub">Product — <span id="msgProductTitle"></span></div>
+        </div>
+        <div><button class="btn ghost" id="btnCloseMsg">Close</button></div>
+      </div>
+      <div style="margin-top:12px;height:320px;display:flex;flex-direction:column">
+        <div style="flex:1;overflow:auto;padding:8px;border-radius:8px;background:var(--glass-2);margin-bottom:8px" id="msgThread"></div>
+        <div style="display:flex;gap:8px">
+          <input id="msgText" placeholder="Type your message to seller..." />
+          <button class="btn" id="sendMsgBtn">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----- Utilities -----
+    const qs = s => document.querySelector(s);
+    const qsa = s => document.querySelectorAll(s);
+    const uid = () => 'u_'+Math.random().toString(36).slice(2,9);
+    const pid = () => 'p_'+Math.random().toString(36).slice(2,9);
+    const now = () => new Date().toISOString();
+
+    // ----- Local Storage Keys -----
+    const LS_USERS = 'swap_users_v1';
+    const LS_PRODUCTS = 'swap_products_v1';
+    const LS_SESSION = 'swap_session_v1';
+    const LS_MESSAGES = 'swap_messages_v1';
+    const LS_FAQS = 'swap_faqs_v1';
+
+    // ----- Bootstrap initial data if empty -----
+    function loadLS(key, fallback){
+      const raw = localStorage.getItem(key);
+      if(!raw && fallback!==undefined){ localStorage.setItem(key, JSON.stringify(fallback)); return fallback; }
+      try{ return raw ? JSON.parse(raw) : fallback; }catch(e){ return fallback; }
+    }
+
+    // initial faqs
+    loadLS(LS_FAQS, [
+      {q:'How does swapping work?', a:'Create a listing describing what you want to trade. Interested users can message you. Agree on terms, meet safely or ship it.'},
+      {q:'Is it free?', a:'Yes — SwapSpace is free to use. We may introduce premium features later.'},
+      {q:'How do I contact a seller?', a:'Open a product and click "Message seller". The seller’s contact info is shown on the listing.'},
+      {q:'How to stay safe?', a:'Meet in public places, verify identity, and exchange confirmations. Never share sensitive information.'}
+    ]);
+
+    // default users + products demo
+    const defaultUsers = [
+      {id:'u_demo1',name:'Ravi Kumar',email:'ravi@example.com',phone:'+91-90000-11111',address:'Hyderabad',password:'demo123'},
+      {id:'u_demo2',name:'Priya Singh',email:'priya@example.com',phone:'+91-90000-22222',address:'Bengaluru',password:'demo123'}
+    ];
+    const defaultProducts = [
+      {id:'p_demo1',title:'Mountain Bike (Good cond.)',desc:'A used mountain bike, size M. Willing to swap for guitar or camera.',ownerId:'u_demo1',location:'Hyderabad',image:'',createdAt:now()},
+      {id:'p_demo2',title:'Acoustic Guitar',desc:'Yamaha acoustic guitar, minor scratches. Looking for sports equipment.',ownerId:'u_demo2',location:'Bengaluru',image:'',createdAt:now()}
+    ];
+
+    loadLS(LS_USERS, []);
+    loadLS(LS_PRODUCTS, []);
+    loadLS(LS_MESSAGES, []);
+
+    // ----- App state -----
+    let currentUser = null;
+
+    // Placeholder SVG for no image
+    const placeholderSVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><rect width="100%" height="100%" fill="#0b1220"/><text x="50%" y="50%" fill="#8b9ab3" font-size="20" text-anchor="middle" dominant-baseline="middle">No image</text></svg>';
+
+    // ----- Elements -----
+    const landing = qs('#landing');
+    const modalBackdrop = qs('#modalBackdrop');
+    const modalContent = qs('#modalContent');
+    const sitebar = qs('#sitebar');
+    const mainApp = qs('#mainApp');
+    const fabAdd = qs('#fabAdd');
+    const btnGetStarted = qs('#btn-getstarted');
+    const btnSigninHero = qs('#btn-signin-hero');
+    const btnAddProduct = qs('#btnAddProduct');
+    const productGrid = qs('#productGrid');
+    const searchInput = qs('#searchInput');
+    const filterLocation = qs('#filterLocation');
+    const ownerContact = qs('#ownerContact');
+    const yearEl = qs('#year');
+    const siteFooter = qs('#siteFooter');
+    const botMessages = qs('#botMessages');
+    const botInput = qs('#botInput');
+    const botSend = qs('#botSend');
+    const toggleChat = qs('#toggleChat');
+
+    yearEl.textContent = new Date().getFullYear();
+
+    // ----- Session management -----
+    function saveUsers(users){ localStorage.setItem(LS_USERS, JSON.stringify(users)); }
+    function saveProducts(products){ localStorage.setItem(LS_PRODUCTS, JSON.stringify(products)); }
+    function saveMessages(msgs){ localStorage.setItem(LS_MESSAGES, JSON.stringify(msgs)); }
+
+    function getUsers(){ return loadLS(LS_USERS, []); }
+    function getProducts(){ return loadLS(LS_PRODUCTS, []); }
+    function getMessages(){ return loadLS(LS_MESSAGES, []); }
+
+    function setSession(user){ currentUser = user; localStorage.setItem(LS_SESSION, JSON.stringify({id:user.id})); }
+    function clearSession(){ currentUser = null; localStorage.removeItem(LS_SESSION); }
+    function loadSession(){ const s = loadLS(LS_SESSION, null); if(s){ const u = getUsers().find(x=>x.id===s.id); if(u) currentUser = u; } }
+
+    // ----- UI flows -----
+    function openModal(html){ modalContent.innerHTML = html; modalBackdrop.style.display='flex'; }
+    function closeModal(){ modalBackdrop.style.display='none'; modalContent.innerHTML=''; }
+
+    // show login/signup forms
+    function showSignup(){
+      openModal(`<h3>Create account</h3>
+        <p class="small">All fields required. Others will use your phone/email/address to contact you for swaps.</p>
+        <label>Full name<input id="su_name" type="text"/></label>
+        <label>Email<input id="su_email" type="email"/></label>
+        <label>Phone<input id="su_phone" type="text"/></label>
+        <label>Address<textarea id="su_address" rows="2"></textarea></label>
+        <div class="row">
+          <div><label>Password<input id="su_pass" type="password"/></label></div>
+          <div><label>Confirm<input id="su_pass2" type="password"/></label></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:12px">
+          <button class="btn ghost" id="cancelSignup">Cancel</button>
+          <button class="btn" id="doSignup">Create account</button>
+        </div>`);
+      qs('#cancelSignup').onclick = closeModal;
+      qs('#doSignup').onclick = () => {
+        const name = qs('#su_name').value.trim();
+        const email = qs('#su_email').value.trim();
+        const phone = qs('#su_phone').value.trim();
+        const address = qs('#su_address').value.trim();
+        const pass = qs('#su_pass').value;
+        const pass2 = qs('#su_pass2').value;
+        if(!name||!email||!phone||!address||!pass){alert('Please fill all fields');return}
+        if(pass!==pass2){alert('Passwords do not match');return}
+        const users = getUsers();
+        if(users.find(u=>u.email===email)){alert('Email already used');return}
+        const newUser = {id:uid(),name,email,phone,address,password:pass};
+        users.push(newUser); saveUsers(users); setSession(newUser); closeModal(); renderApp();
+      }
+    }
+
+    function showSignin(){
+      openModal(`<h3>Sign in</h3>
+        <label>Email<input id="si_email" type="email"/></label>
+        <label>Password<input id="si_pass" type="password"/></label>
+        <div style="display:flex;justify-content:space-between;margin-top:12px">
+          <button class="btn ghost" id="cancelSignin">Cancel</button>
+          <button class="btn" id="doSignin">Sign in</button>
+        </div>`);
+      qs('#cancelSignin').onclick = closeModal;
+      qs('#doSignin').onclick = () => {
+        const email = qs('#si_email').value.trim();
+        const pass = qs('#si_pass').value;
+        const users = getUsers();
+        const u = users.find(x=>x.email===email && x.password===pass);
+        if(!u){alert('Invalid credentials');return}
+        setSession(u); closeModal(); renderApp();
+      }
+    }
+
+    // Add product form
+    function showAddProduct(prefill){
+      const p = prefill||{};
+      openModal(`<h3>Add a listing</h3>
+        <label>Title<input id="p_title" type="text" value="${(p.title||'').replace(/"/g,'')}"></label>
+        <label>Description<textarea id="p_desc" rows="3">${(p.desc||'').replace(/"/g,'')}</textarea></label>
+        <div class="row">
+          <div><label>Location<input id="p_location" type="text" value="${p.location||currentUser.address||''}"></label></div>
+          <div><label>Category<input id="p_cat" type="text" placeholder="e.g., Electronics, Sports"/></label></div>
+        </div>
+        <label>Images (you can add multiple)<input id="p_images" type="file" accept="image/*" multiple></label>
+        <div id="preview" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:12px">
+          <button class="btn ghost" id="cancelAdd">Cancel</button>
+          <button class="btn" id="doAdd">Publish</button>
+        </div>`);
+
+      const inputFiles = qs('#p_images');
+      const preview = qs('#preview');
+      inputFiles.onchange = (e)=>{
+        preview.innerHTML='';
+        const files = Array.from(e.target.files).slice(0,4);
+        files.forEach(file=>{
+          const fr = new FileReader();
+          fr.onload = ()=>{
+            const img = document.createElement('img'); img.src = fr.result; img.style.width='120px'; img.style.height='90px'; img.style.objectFit='cover'; img.style.borderRadius='8px'; preview.appendChild(img);
+          };
+          fr.readAsDataURL(file);
+        })
+      }
+
+      qs('#cancelAdd').onclick = closeModal;
+      qs('#doAdd').onclick = () => {
+        const title = qs('#p_title').value.trim();
+        const desc = qs('#p_desc').value.trim();
+        const location = qs('#p_location').value.trim();
+        const cats = qs('#p_cat').value.trim();
+        if(!title||!desc||!location){alert('Title, description and location required');return}
+        // process images
+        const files = Array.from(qs('#p_images').files);
+        if(files.length===0){
+          // allow posting with default placeholder
+          const product = {id:pid(),title,desc,location,ownerId:currentUser.id,image:'',category:cats,createdAt:now()};
+          const all = getProducts(); all.unshift(product); saveProducts(all); closeModal(); renderProducts();
+          return;
+        }
+        // Read all files as dataURL
+        const readers = files.map(f=>new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(f);}));
+        Promise.all(readers).then(images=>{
+          const product = {id:pid(),title,desc,location,ownerId:currentUser.id,image:images[0]||'',images,category:cats,createdAt:now()};
+          const all = getProducts(); all.unshift(product); saveProducts(all); closeModal(); renderProducts();
+        })
+      }
+    }
+
+    // render product cards
+    function renderProducts(filter=''){
+      const prods = getProducts();
+      const q = (filter||searchInput.value||'').toLowerCase();
+      const locFilter = filterLocation.value;
+      productGrid.innerHTML='';
+      // build unique locations
+      const locations = [...new Set(prods.map(p=>p.location).filter(Boolean))];
+      filterLocation.innerHTML = '<option value="">All locations</option>' + locations.map(l=>`<option value="${l}">${l}</option>`).join('');
+
+      prods.filter(p=>{
+        if(locFilter && p.location!==locFilter) return false;
+        if(!q) return true;
+        return (p.title+p.desc+p.location+(p.category||'')).toLowerCase().includes(q);
+      }).forEach(p=>{
+        const owner = getUsers().find(u=>u.id===p.ownerId) || {name:'Unknown',phone:'',email:''};
+        const el = document.createElement('div'); el.className='card';
+        el.innerHTML = `
+          <div style="position:relative">
+            <img src="${p.image||placeholderSVG}" alt="${p.title}">
+          </div>
+          <div class="meta">
+            <div>
+              <div class="title">${p.title}</div>
+              <div class="muted">${p.location} • ${new Date(p.createdAt).toLocaleDateString()}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Owner</div>
+              <div style="font-weight:700">${owner.name}</div>
+            </div>
+          </div>
+          <div class="small" style="margin-top:4px">${p.desc.slice(0,120)}${p.desc.length>120?'...':''}</div>
+          <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+            <button class="btn" data-action="msg" data-id="${p.id}">Message seller</button>
+            <button class="btn ghost" data-action="view" data-id="${p.id}">View</button>
+            <div style="flex:1"></div>
+            <div class="small">${owner.phone||''}</div>
+          </div>
+        `;
+        productGrid.appendChild(el);
+      });
+
+      // attach events
+      qsa('[data-action="msg"]').forEach(b => b.onclick = (e)=>{
+        const id = e.currentTarget.dataset.id; openMessageThread(id);
+      })
+      qsa('[data-action="view"]').forEach(b => b.onclick = (e)=>{
+        const id = e.currentTarget.dataset.id; viewProduct(id);
+      })
+    }
+
+    function viewProduct(id){
+      const p = getProducts().find(x=>x.id===id);
+      if(!p)return; const owner = getUsers().find(u=>u.id===p.ownerId) || {};
+      openModal(`<div style="display:flex;gap:12px">
+        <div style="flex:1">
+          <img src="${p.image||''}" style="width:100%;height:320px;object-fit:cover;border-radius:10px;background:linear-gradient(90deg,#091327,#061226)">
+        </div>
+        <div style="width:360px">
+          <h3 style="margin:0">${p.title}</h3>
+          <div class="small">${p.location} • ${new Date(p.createdAt).toLocaleString()}</div>
+          <p class="small" style="margin-top:12px">${p.desc}</p>
+          <div style="margin-top:12px">
+            <div class="small">Owner</div>
+            <div style="font-weight:700">${owner.name||'Unknown'}</div>
+            <div class="small">${owner.phone||''} • ${owner.email||''}</div>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn" id="viewMsgBtn">Message seller</button>
+              <button class="btn ghost" id="viewClose">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>`);
+      qs('#viewClose').onclick = closeModal;
+      qs('#viewMsgBtn').onclick = ()=>{ closeModal(); openMessageThread(id); }
+    }
+
+    // Message threads
+    function openMessageThread(productId){
+      const p = getProducts().find(x=>x.id===productId); if(!p) return; const owner = getUsers().find(u=>u.id===p.ownerId)||{};
+      if(!currentUser){ alert('Please sign in to message sellers'); showSignin(); return; }
+      const threadKey = [productId, currentUser.id, p.ownerId].sort().join('|'); // deterministic
+      const msgs = getMessages().filter(m=>m.thread===threadKey);
+      qs('#msgTitle').textContent = `Chat with ${owner.name||'seller'}`;
+      qs('#msgProductTitle').textContent = p.title;
+      renderThread(msgs);
+      qs('#msgBackdrop').style.display='flex';
+
+      qs('#sendMsgBtn').onclick = ()=>{
+        const text = qs('#msgText').value.trim(); if(!text) return; qs('#msgText').value='';
+        const messages = getMessages();
+        messages.push({id:'m_'+Math.random().toString(36).slice(2,9),thread:threadKey,from:currentUser.id,to:p.ownerId,text,createdAt:now(),productId});
+        saveMessages(messages);
+        renderThread(messages.filter(m=>m.thread===threadKey));
+        // notify: in a real app, we'd send push/email. We'll also save a quick system message for seller view.
+      }
+
+      qs('#btnCloseMsg').onclick = ()=>{ qs('#msgBackdrop').style.display='none'; }
+    }
+
+    function renderThread(msgs){
+      const el = qs('#msgThread'); el.innerHTML='';
+      msgs.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt)).forEach(m=>{
+        const div = document.createElement('div'); div.style.margin='6px 0'; div.style.maxWidth='80%';
+        div.className = 'msg ' + (m.from===currentUser.id ? 'me':'bot');
+        div.innerHTML = `<div style="font-size:13px">${m.text}</div><div class="small" style="margin-top:6px;color:var(--muted);font-size:11px">${new Date(m.createdAt).toLocaleString()}</div>`;
+        el.appendChild(div);
+      });
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // Chatbot rudimentary engine (rules + FAQ)
+    const faqs = loadLS(LS_FAQS, []);
+    function botReply(text){
+      const t = text.toLowerCase();
+      // if matches FAQ keywords
+      for(const f of faqs){ if(t.includes(f.q.toLowerCase().split(' ')[0])) return f.a; }
+      if(t.includes('how') && t.includes('swap')) return 'Create a listing with clear photos and a description. Message the seller and confirm terms — meet in public.';
+      if(t.includes('safe')||t.includes('safety')) return 'Always meet in public places, bring a friend, and avoid sharing sensitive personal details. Verify the item in person.';
+      if(t.includes('contact')||t.includes('phone')) return 'You can view seller contact details on each listing. Also message them via the in-app chat.';
+      if(t.includes('price')||t.includes('cash')) return 'SwapSpace focuses on swaps. If you prefer money, discuss and agree with the owner before exchanging.';
+      // small talk
+      if(t.includes('hello')||t.includes('hi')) return 'Hello! 👋 I am SwapBot. How can I help you today? Ask about listings, safety, or how to add items.';
+
+      // fallback creative reply
+      const alternatives = [
+        "Great question — here’s a quick tip: be clear in your listing and add good pictures.",
+        "If you want, paste the product title and I can suggest improvements to your listing.",
+        "I might not be perfect yet, but I can answer FAQs or guide you through posting a listing."
+      ];
+      return alternatives[Math.floor(Math.random()*alternatives.length)];
+    }
+
+    function appendBotMessage(text,who='bot'){ const div=document.createElement('div'); div.className='msg '+(who==='me'?'me':'bot'); div.innerHTML=`<div>${text}</div>`; botMessages.appendChild(div); botMessages.scrollTop=botMessages.scrollHeight; }
+
+    botSend.onclick = ()=>{ const text = botInput.value.trim(); if(!text) return; appendBotMessage(text,'me'); botInput.value=''; setTimeout(()=>{ appendBotMessage(botReply(text),'bot'); },600); }
+    botInput.addEventListener('keydown',e=>{ if(e.key==='Enter') botSend.click(); })
+
+    // misc events
+    btnGetStarted.onclick = showSignup; btnSigninHero.onclick = showSignin; qs('#btn-signin-hero').onclick = showSignin;
+    qs('#btn-logout').onclick = ()=>{ if(confirm('Log out?')){clearSession(); renderApp();} }
+    btnAddProduct.onclick = ()=>{ if(!currentUser){ showSignin(); return } showAddProduct(); }
+    fabAdd.onclick = ()=>{ if(!currentUser){ showSignin(); return } showAddProduct(); }
+
+    // search
+    searchInput.addEventListener('input',()=>renderProducts()); filterLocation.addEventListener('change',()=>renderProducts());
+
+    // close modal on backdrop click
+    modalBackdrop.addEventListener('click', e=>{ if(e.target===modalBackdrop) closeModal(); });
+    msgBackdrop.addEventListener('click', e=>{ if(e.target===msgBackdrop) qs('#msgBackdrop').style.display='none'; });
+
+    // render after login
+    function renderApp(){
+      loadSession();
+      if(currentUser){
+        landing.style.display='none'; sitebar.style.display='flex'; mainApp.style.display='block'; fabAdd.style.display='flex'; siteFooter.style.display='flex'; qs('#loggedName').textContent = currentUser.name; renderProducts();
+      } else {
+        landing.style.display='flex'; sitebar.style.display='none'; mainApp.style.display='none'; fabAdd.style.display='none'; siteFooter.style.display='none';
+      }
+    }
+
+    // initial run
+    renderApp();
+
+    // Small UX polish: welcome bot message
+    appendBotMessage('Welcome to SwapSpace — Ask me about posting, safety tips, or how swapping works.');
+
+    // Chatbot toggle
+    toggleChat.onclick = () => {
+      const chatbot = qs('#chatbot');
+      chatbot.classList.toggle('minimized');
+      toggleChat.textContent = chatbot.classList.contains('minimized') ? '+' : '-';
+    };
+
+  </script>
+</body>
+</html>
